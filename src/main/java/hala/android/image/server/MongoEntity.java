@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import org.apache.commons.codec.binary.Base64;
 /**
  *
  * @author arelin
@@ -37,12 +36,12 @@ public class MongoEntity {
         _db = _mongoClient.getDB(uri.getDatabase());
     }
     
-    public byte[] getImage(String userId, String imageId) {
+    public String getImage(String userId, String imageId) {
         DBCollection currUser = _db.getCollection("user" + userId);
-        MongoCursor<DBObject> result = currUser.find(eq("imageId", imageId)).iterator();
+        MongoCursor<DBObject> result = currUser.find(eq("imageId", imageId));
         DBObject retrived_doc = result.next();
         result.close();
-        return Base64.decodeBase64((String)retrived_doc.get("image"));
+        return (String) retrived_doc.get("image");
     }
     
     public String[] listImages(String userId) {
@@ -63,11 +62,11 @@ public class MongoEntity {
         return results;
     }
     
-    public String setImage(String userId, byte[] image) {
+    public String setImage(String userId, String base64) {
         DBCollection currUser = _db.getCollection("user" + userId);
         String docId =  UUID.randomUUID().toString();
         currUser.insert(new BasicDBObject("imageId", docId)
-                .append("image", Base64.encodeBase64String(image)));
+                .append("image", base64));
         return docId;
     }
     
