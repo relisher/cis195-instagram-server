@@ -10,7 +10,7 @@ package hala.android.image.server;
  * @author arelin
  */
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.StringJoiner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,6 @@ public class ImageController {
 @RequestMapping(value = "/get-image", method = RequestMethod.GET)
 public @ResponseBody ResponseEntity<?> getImage(@RequestParam(value = "imageId") 
         String imageId, @RequestParam(value="userId") String userId) throws IOException {
-    InputStream in;
     if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
         HttpHeaders headers = new HttpHeaders();
         String media = _me.getImage(userId, imageId);
@@ -51,13 +50,60 @@ public @ResponseBody ResponseEntity<?> getImage(@RequestParam(value = "imageId")
 @RequestMapping(value = "/set-image", method = RequestMethod.GET)
 public @ResponseBody ResponseEntity<?> setImageAsByteArray(
         @RequestParam(value="userId") String userId, @RequestParam("image") String base64) throws IOException {
-    InputStream in;
     if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
        return new ResponseEntity<String>(_me.setImage(userId, base64), HttpStatus.OK);
     }
     return new ResponseEntity<String>("Unauthorized", HttpStatus.UNAUTHORIZED);
 }
 
+@RequestMapping(value = "/list-image", method = RequestMethod.GET)
+public @ResponseBody ResponseEntity<?> listImages(@RequestParam(value="userId") String userId) 
+        throws IOException {
+    if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
+        HttpHeaders headers = new HttpHeaders();
+        String[] media = _me.listImages(userId);
+        StringJoiner sj = new StringJoiner(",");
+        for(String s : media) {
+            sj.add(s);
+        }
+        headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+     
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(sj.toString()
+                   , headers, HttpStatus.OK);
+        return responseEntity;
+    }
+    return new ResponseEntity<String>("Unauthorized",  HttpStatus.UNAUTHORIZED);
+}
+
+@RequestMapping(value = "/delete-image", method = RequestMethod.GET)
+public @ResponseBody ResponseEntity<?> deleteImage(@RequestParam(value = "imageId") 
+        String imageId, @RequestParam(value="userId") String userId) throws IOException {
+    if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
+        HttpHeaders headers = new HttpHeaders();
+        Boolean response = _me.deleteImage(userId, imageId);
+        headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+     
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(response.toString()
+                , headers, HttpStatus.OK);
+        return responseEntity;
+    }
+    return new ResponseEntity<String>("Unauthorized",  HttpStatus.UNAUTHORIZED);
+}
+
+@RequestMapping(value = "/delete-all-images", method = RequestMethod.GET)
+public @ResponseBody ResponseEntity<?> deleteAllImage(@RequestParam(value = "imageId") 
+        String imageId, @RequestParam(value="userId") String userId) throws IOException {
+    if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
+        HttpHeaders headers = new HttpHeaders();
+        Boolean response = _me.deleteAllImages(userId);
+        headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+     
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(response.toString()
+                , headers, HttpStatus.OK);
+        return responseEntity;
+    }
+    return new ResponseEntity<String>("Unauthorized",  HttpStatus.UNAUTHORIZED);
+}
 
     
 }

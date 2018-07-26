@@ -38,9 +38,11 @@ public class MongoEntity {
     
     public String getImage(String userId, String imageId) {
         DBCollection currUser = _db.getCollection("user" + userId);
-        MongoCursor<DBObject> result = currUser.find(eq("imageId", imageId));
-        DBObject retrived_doc = result.next();
-        result.close();
+        BasicDBObject fields = new BasicDBObject();
+	fields.put("imageId", imageId);
+        DBCursor find = currUser.find(fields);
+        DBObject retrived_doc = find.next();
+        find.close();
         return (String) retrived_doc.get("image");
     }
     
@@ -72,7 +74,9 @@ public class MongoEntity {
     
     public boolean deleteImage(String userId, String imageId) {
         DBCollection currUser = _db.getCollection("user" + userId);
-        MongoCursor<DBObject> result = currUser.find(eq("imageId", imageId)).iterator();
+        BasicDBObject fields = new BasicDBObject();
+	fields.put("imageId", imageId);
+        DBCursor result = currUser.find(fields);
         DBObject retrieved_doc = result.next();
         result.close();
         return currUser.remove(retrieved_doc).wasAcknowledged();
