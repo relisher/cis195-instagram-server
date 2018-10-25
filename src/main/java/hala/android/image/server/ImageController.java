@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.CacheControl;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  *
@@ -39,19 +40,21 @@ public @ResponseBody ResponseEntity<?> getImage(@RequestParam(value = "imageId")
     if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
         HttpHeaders headers = new HttpHeaders();
         String media = _me.getImage(userId, imageId);
+        String response = "{ image :" + media + "}";
         headers.setCacheControl(CacheControl.noCache().getHeaderValue());
      
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(media, headers, HttpStatus.OK);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(response, headers, HttpStatus.OK);
         return responseEntity;
     }
     return new ResponseEntity<String>("Unauthorized",  HttpStatus.UNAUTHORIZED);
 }
 
-@RequestMapping(value = "/set-image", method = RequestMethod.GET)
+@RequestMapping(value = "/set-image", method = RequestMethod.POST)
 public @ResponseBody ResponseEntity<?> setImageAsByteArray(
-        @RequestParam(value="userId") String userId, @RequestParam("image") String base64) throws IOException {
+        @RequestParam(value="userId") String userId, @RequestBody Image image) throws IOException {
     if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
-       return new ResponseEntity<String>(_me.setImage(userId, base64), HttpStatus.OK);
+       String imageResponse = "{ status : " + _me.setImage(userId, image.getPicture()) + "}";
+       return new ResponseEntity<String>(imageResponse, HttpStatus.OK);
     }
     return new ResponseEntity<String>("Unauthorized", HttpStatus.UNAUTHORIZED);
 }
@@ -67,8 +70,8 @@ public @ResponseBody ResponseEntity<?> listImages(@RequestParam(value="userId") 
             sj.add(s);
         }
         headers.setCacheControl(CacheControl.noCache().getHeaderValue());
-     
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(sj.toString()
+        String images = "{ images : [" + sj.toString() + "] }";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(images
                    , headers, HttpStatus.OK);
         return responseEntity;
     }
@@ -82,8 +85,8 @@ public @ResponseBody ResponseEntity<?> deleteImage(@RequestParam(value = "imageI
         HttpHeaders headers = new HttpHeaders();
         Boolean response = _me.deleteImage(userId, imageId);
         headers.setCacheControl(CacheControl.noCache().getHeaderValue());
-     
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(response.toString()
+        String responseString = "{ success : " + response.toString() + "}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(responseString
                 , headers, HttpStatus.OK);
         return responseEntity;
     }
@@ -97,8 +100,8 @@ public @ResponseBody ResponseEntity<?> deleteAllImage(@RequestParam(value = "ima
         HttpHeaders headers = new HttpHeaders();
         Boolean response = _me.deleteAllImages(userId);
         headers.setCacheControl(CacheControl.noCache().getHeaderValue());
-     
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(response.toString()
+        String responseString = "{ success : " + response.toString() + "}";
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(responseString
                 , headers, HttpStatus.OK);
         return responseEntity;
     }
