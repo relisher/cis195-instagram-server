@@ -11,12 +11,21 @@ package hala.android.image.server;
  */
 public class Image {
     private String picture;
+    private String description;
 
     public String getPicture() {
-         return picture;
+         return this.picture;
     }
 
     public void setPicture(String picture) {
         this.picture = picture;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public String getDescription() {
+        return this.description;
     }
 }

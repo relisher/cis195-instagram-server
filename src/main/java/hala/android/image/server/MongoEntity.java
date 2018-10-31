@@ -46,6 +46,16 @@ public class MongoEntity {
         return (String) retrived_doc.get("image");
     }
     
+    public String getImageDescription(String userId, String imageId) {
+        DBCollection currUser = _db.getCollection("user" + userId);
+        BasicDBObject fields = new BasicDBObject();
+	fields.put("imageId", imageId);
+        DBCursor find = currUser.find(fields);
+        DBObject retrived_doc = find.next();
+        find.close();
+        return (String) retrived_doc.get("description");
+    }
+    
     public String[] listImages(String userId) {
         DBCollection currUser = _db.getCollection("user" + userId);
         CompletableFuture<List<DBObject>> future = new CompletableFuture<>();
@@ -64,11 +74,11 @@ public class MongoEntity {
         return results;
     }
     
-    public String setImage(String userId, String base64) {
+    public String setImage(String userId, String base64, String text) {
         DBCollection currUser = _db.getCollection("user" + userId);
         String docId =  UUID.randomUUID().toString();
         currUser.insert(new BasicDBObject("imageId", docId)
-                .append("image", base64));
+                .append("image", base64).append("description", text));
         return docId;
     }
     

@@ -40,7 +40,8 @@ public @ResponseBody ResponseEntity<?> getImage(@RequestParam(value = "imageId")
     if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
         HttpHeaders headers = new HttpHeaders();
         String media = _me.getImage(userId, imageId);
-        String response = "{ image :" + media + "}";
+        String description = _me.getImageDescription(userId, imageId);
+        String response = "{ image_object : { image :" + media + " , description :" + description + "}}";
         headers.setCacheControl(CacheControl.noCache().getHeaderValue());
      
         ResponseEntity<String> responseEntity = new ResponseEntity<>(response, headers, HttpStatus.OK);
@@ -53,7 +54,7 @@ public @ResponseBody ResponseEntity<?> getImage(@RequestParam(value = "imageId")
 public @ResponseBody ResponseEntity<?> setImageAsByteArray(
         @RequestParam(value="userId") String userId, @RequestBody Image image) throws IOException {
     if(AuthenticatedUsers.isAuthenticatedUser(userId)) {
-       String imageResponse = "{ status : " + _me.setImage(userId, image.getPicture()) + "}";
+       String imageResponse = "{ status : " + _me.setImage(userId, image.getPicture(), image.getDescription()) + "}";
        return new ResponseEntity<String>(imageResponse, HttpStatus.OK);
     }
     return new ResponseEntity<String>("Unauthorized", HttpStatus.UNAUTHORIZED);
